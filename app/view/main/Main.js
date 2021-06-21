@@ -16,7 +16,6 @@ Ext.define('JZYIndent.view.main.Main', {
     },
     stateId: 'kitchensink-viewport',
 
-
     initComponent: function () {
         var me = this;
         var within = [];
@@ -299,7 +298,7 @@ Ext.define('JZYIndent.view.main.Main', {
                     }
                 }
             });
-        } else if (userType == 'U') {
+        } else if (userType == 'C') {
             Ext.apply(me, {
                 items: [
                     {
@@ -577,13 +576,23 @@ Ext.define('JZYIndent.view.main.Main', {
                 },
             });
         }
-        /*else {
+        else {
             Ext.apply(me, {
                 items: [{
                     xtype: 'navigation-tree',
                 }],
             });
-        }*/
+            var _this = new JZYIndent.LoginManager({
+                session: null,
+                model: 'User'
+            });
+            Ext.MessageBox.confirm('温馨提醒', '该用户暂无权限登录，是否返回登录页？', function (btn, text) {
+                if (btn != 'yes') {
+                    return false;
+                }
+                _this.logout();
+            });
+        }
         me.callParent(arguments);
 
     }

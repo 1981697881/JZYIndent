@@ -48,7 +48,6 @@ Ext.define('JZYIndent.LoginManager', {
             callback: this.onLoginReturn,
             original: options
         };
-        //console.log(JZYIndent.Cfg.SIM_ENM['User'])
     	if(!JZYIndent.Cfg.SIM_ENM['User']){
     		Ext.apply(req,{
     			method: 'POST',
@@ -56,8 +55,8 @@ Ext.define('JZYIndent.LoginManager', {
                 params : Ext.JSON.encode(options.data)
     		});
     	}
-		Ext.Ajax.request(req);
-        //console.log(req)
+        console.log(req)
+        Ext.Ajax.request(req);
     },
     onLoginReturn: function(options, success, response) {
         var respText = Ext.util.JSON.decode(response.responseText);
@@ -86,7 +85,10 @@ Ext.define('JZYIndent.LoginManager', {
                     if(user.data!=null) {
                         console.log(user.data.data)
                         Ext.util.Cookies.set("FUserID", user.data.data[0].FUserID);
+                        Ext.util.Cookies.set("FEmpID", user.data.data[0].FEmpID);
                         Ext.util.Cookies.set("FUserType", user.data.data[0].FUserType);
+                        Ext.util.Cookies.set("FEmpName", user.data.data[0].FEmpName);
+                        Ext.util.Cookies.set("FEmpNumber", user.data.data[0].FEmpNumber);
                         Ext.util.Cookies.set("username", options.data.username);
                         Ext.util.Cookies.set("password", options.data.password);
                     }

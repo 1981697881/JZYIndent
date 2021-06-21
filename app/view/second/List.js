@@ -70,7 +70,8 @@ Ext.define('JZYIndent.view.second.List', {
                     result = result/Math.pow(10,lastLen);
                     return result.toFixed(index);
                 }
-                e.record.data['Famount']=((parseFloat(e.record.data['Fauxprice'])*100)*parseInt(e.record.data['Fauxqty']))/100
+                e.record.data['FTaxAmount']=((parseFloat(Ext.util.Cookies.get("FEmpID"))/100) * ((parseFloat(e.record.data['Fauxprice']) * parseFloat(e.record.data['Fauxqty']))) * 10000) / 10000
+                e.record.data['Famount']=((parseFloat(e.record.data['Fauxprice'])*parseInt(e.record.data['Fauxqty']) + parseFloat(e.record.data['FTaxAmount']))*10000)/10000
                 /* e.record.data['FTaxAmount']=((parseFloat(e.record.data['Fauxprice'])*100)*parseInt(e.record.data['Fauxqty']))/100-parseFloat(e.record.data['Famount'])*/
                 e.record.data['FactualPrice']=dealNum(parseFloat(e.record.data['Famount']),parseInt(e.record.data['Fauxqty']),2)
                 e.record.commit()
@@ -174,32 +175,38 @@ Ext.define('JZYIndent.view.second.List', {
             align: 'center',
             filter: 'string',
         },
-
         {
-            text: '折扣额',
-            dataIndex: 'FTaxAmount',
-            align: 'center',
-            filter: 'string',
-        },
-
-        {
-            text: '折扣率',
+            text: '税率',
             dataIndex: 'FTaxRate',
             align: 'center',
             filter: 'string',
 
         },
         {
+            text: '税额',
+            dataIndex: 'FTaxAmount',
+            align: 'center',
+            filter: 'string',
+            summaryType: function (records, value) {
+                var total = 0;
+                for (var i = 0; i < records.length; i++) {
+                    total += Number(records[i].get("FTaxAmount"));
+                }
+                return "<font style='color:red;';>" + total.toFixed(2) + "</font>"
+            }
+        },
+
+        {
             text: '金额',
             align: 'center',
             dataIndex: 'Famount',
             filter: 'number',
-            editor: {
+            /*editor: {
                 xtype: 'numberfield',
                 allowDecimals: true,
                 decimalPrecision: 0,
                 allowBlank: false,
-            },
+            },*/
             summaryType: function (records, value) {
                 var total = 0;
                 for (var i = 0; i < records.length; i++) {

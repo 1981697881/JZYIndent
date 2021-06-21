@@ -19,7 +19,6 @@ Ext.define('JZYIndent.view.head.Detail', {
                 first = this.up('doMain').down("firstlist"),
                 gird = this.up('doMain').down("secondlist"),
                 sStore = gird.getStore();
-            form.reset()
             sStore.removeAll();
             first.getStore().load();
             Ext.Ajax.request({
@@ -32,7 +31,7 @@ Ext.define('JZYIndent.view.head.Detail', {
                     'Content-Type': 'application/json'
                 },
                 params: Ext.JSON.encode({
-                    TranType: "81"
+                    TranType: "70"
                 }),
                 success: function (result) {
                     var respText = Ext.util.JSON.decode(result.responseText);
@@ -53,18 +52,20 @@ Ext.define('JZYIndent.view.head.Detail', {
         handler: function () {
             var form = this.up('form').getForm(),
                 gird = this.up('doMain').down("secondlist"),
+                first = this.up('doMain').down("firstlist"),
                 sStore = gird.getStore();
             if (!form.isValid()) {
                 return false;
             } else {
                 var params = form.getValues(),
                     array = [];
-                console.log(gird.getStore())
                 for (var j = 0; j < sStore.getCount(); j++) {
                     array.push(sStore.getAt(j).data)
                 }
                 params.item = array
-                params.FEmpID = Ext.util.Cookies.get("FUserID")
+                params.FEmpID = Ext.util.Cookies.get("FEmpID")
+                params.fsupplyid = Ext.util.Cookies.get("FEmpNumber")
+                params.FTranType = "70"
                 Ext.Ajax.request({
                     url: JZYIndent.Cfg.server + '/base/SEOrderAdd',
                     method: 'POST',
@@ -77,13 +78,45 @@ Ext.define('JZYIndent.view.head.Detail', {
                     withCredentials: true,
                     success: function (result) {
                         var respText = Ext.util.JSON.decode(result.responseText);
-                        console.log(respText)
-                        Ext.toast({
-                            title: '提示',
-                            html: respText.message + ",销售订单：" + respText.data[0].OutFBillNo,
-                            align: 't',
-                            bodyPadding: 10
-                        });
+                        if(respText.success){
+                            Ext.toast({
+                                title: '提示',
+                                html: respText.message + ",销售订单：" + respText.data[0].OutFBillNo,
+                                align: 't',
+                                bodyPadding: 10
+                            });
+                            sStore.removeAll();
+                            first.getStore().load();
+                            Ext.Ajax.request({
+                                url: JZYIndent.Cfg.server + '/base/getBillNo',
+                                method: 'post',
+                                scope: this,
+                                async: false,
+                                withCredentials: true,
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                params: Ext.JSON.encode({
+                                    TranType: "70"
+                                }),
+                                success: function (results) {
+                                    form.findField('FBillNo').setValue(Ext.util.JSON.decode(results.responseText).data.billNo)
+                                },
+                                failure: function () {
+                                    Ext.Msg.alert("提示", "请求失败！");
+                                },
+                                callback: function (opts, success, response) {
+
+                                },
+                            });
+                        }else{
+                            Ext.toast({
+                                title: '提示',
+                                html: respText.message,
+                                align: 't',
+                                bodyPadding: 10
+                            });
+                        }
                     },
                     failure: function () {
                         Ext.Msg.alert("提示", "保存失败！");
@@ -143,8 +176,13 @@ Ext.define('JZYIndent.view.head.Detail', {
                     fieldLabel: '供应商',
                     allowBlank: false,
                     blankText: '不能为空(必填)',
-                    name: 'FBillNo',
+                    name: 'fsupplyname',
                     readOnly: true,
+                    listeners: {
+                        afterRender: function (field) {
+                            field.setValue(Ext.util.Cookies.get("FEmpName"))
+                        }
+                    }
                 },
                 {
                     xtype: 'textfield',
@@ -165,7 +203,7 @@ Ext.define('JZYIndent.view.head.Detail', {
                                     'Content-Type': 'application/json'
                                 },
                                 params: Ext.JSON.encode({
-                                    TranType: "81"
+                                    TranType: "70"
                                 }),
                                 success: function (result) {
                                     var respText = Ext.util.JSON.decode(result.responseText);
