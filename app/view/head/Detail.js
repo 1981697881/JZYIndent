@@ -172,6 +172,26 @@ Ext.define('JZYIndent.view.head.Detail', {
                     blankText: '不能为空(必填)',
                 },
                 {
+                    fieldLabel: '到货日期',
+                    xtype: 'datefield',
+                    name: 'arrivalDate',
+                    //allowBlank: true,
+                    format: 'Y-m-d',
+                    value: Ext.util.Format.date(Ext.Date.add(new Date(), Ext.Date.MONTH), "Y-m-d"),
+                    listeners: {
+                        change: function (fld, newValue, oldValue, eOpts) {
+                            var me = this,
+                                gird = this.up('doMain').down("secondlist"),
+                                sStore = gird.getStore();
+                            if (newValue != oldValue) {
+                                for (var i = 0; i < sStore.getCount() ; i++) {
+                                    sStore.getAt(i).set("Fdate", newValue);
+                                }
+                            }
+                        },
+                    }
+                },
+                {
                     xtype: 'textfield',
                     fieldLabel: '供应商',
                     allowBlank: false,

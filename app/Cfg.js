@@ -12,7 +12,7 @@ Ext.define('JZYIndent.Cfg', {
         'second': 50,
         'third': 50,
     },
-    //server: 'http://localhost:5678/allkd',
+    //server: 'http://14.29.198.5:8085/allkd_barcode',
     server: 'http://test.gzfzdev.com:10008/allkd_barcode_war_exploded',
     usrInfo: null,
     houseInfo:null,

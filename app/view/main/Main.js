@@ -26,7 +26,7 @@ Ext.define('JZYIndent.view.main.Main', {
                 items: [
                     {
                         region: 'north',
-                        height: '6%',
+                        height: '7%',
                         minSize: 75,
                         margins: '5 0 0 0',
                         xtype: 'DForm',
