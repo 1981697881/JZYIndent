@@ -151,12 +151,9 @@ Ext.define('JZYIndent.view.second.List', {
         }, {
             text: '到货日期',
             dataIndex: 'Fdate',
+            format:'Y-m-d',
             align: 'center',
-            filter: 'string',
-            renderer: function(val){
-                if(val == null) return "";
-                return Ext.Date.format(new Date(val), 'Y-m-d');
-            },
+            renderer : Ext.util.Format.dateRenderer('Y-m-d'),
             editor: {
                 xtype: 'datefield',
                 format: 'Y-m-d',

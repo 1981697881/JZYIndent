@@ -60,8 +60,12 @@ Ext.define('JZYIndent.view.head.Detail', {
                 var params = form.getValues(),
                     array = [];
                 for (var j = 0; j < sStore.getCount(); j++) {
+                    if(sStore.getAt(j).get("Fdate") != null ){
+                        sStore.getAt(j).set("Fdate", Ext.Date.format(sStore.getAt(j).get("Fdate"), "Y-m-d"));
+                    }
                     array.push(sStore.getAt(j).data)
                 }
+                console.log(array)
                 params.item = array
                 params.FEmpID = Ext.util.Cookies.get("FEmpID")
                 params.fsupplyid = Ext.util.Cookies.get("FEmpNumber")
