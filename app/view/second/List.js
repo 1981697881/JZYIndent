@@ -40,45 +40,12 @@ Ext.define('JZYIndent.view.second.List', {
         clicksToEdit: 1,
         listeners: {
             edit: function (editor, e) {
-                // num1,num2 参数，index 保留的位数
-                function dealNum(num1,num2,index){
-                    var result = 0;
-                    // 获得两个小数长度
-                    var numa = num1.toString();
-                    var numb = num2.toString();
-                    // 分别记录两数小数长度
-                    var lena = 0;
-                    var lenb = 0;
-                    // 最长小数的长度
-                    var lastLen = 0 ;
-                    if(numa.indexOf('.') > 0){
-                        lena = numa.split('.')[1].length;
-                    }
-                    if(numb.indexOf('.') > 0){
-                        lenb = numb.split('.')[1].length;
-                    }
-                    // 去掉小数点
-                    numa = numa.replace('.','');
-                    numb = numb.replace('.','');
-                    if(lena > lenb ){
-                        lastLen  = lena;
-                    }else{
-                        lastLen  = lenb;
-                    }
-                    // 做相应的加减乘除(这里只做加法运算,其他差不多)
-                    result =  Number(numa)/Number(numb);
-                    result = result/Math.pow(10,lastLen);
-                    return result.toFixed(index);
-                }
-                e.record.data['FTaxAmount']=Math.floor((parseFloat(Ext.util.Cookies.get("FEmpID"))/100) * ((parseFloat(e.record.data['Fauxprice']) * parseFloat(e.record.data['Fauxqty']))) * 10000) / 10000
-                e.record.data['Famount']=Math.floor((parseFloat(e.record.data['Fprice'])*parseInt(e.record.data['Fauxqty']))*10000)/10000
-                e.record.data['Fallamount']=Math.floor((parseFloat(e.record.data['Fprice'])*parseInt(e.record.data['Fauxqty']) + parseFloat(e.record.data['FTaxAmount']))*10000)/10000
-                /* e.record.data['FTaxAmount']=((parseFloat(e.record.data['Fauxprice'])*100)*parseInt(e.record.data['Fauxqty']))/100-parseFloat(e.record.data['Famount'])*/
-               /* e.record.data['FactualPrice']=dealNum(parseFloat(e.record.data['Famount']),parseInt(e.record.data['Fauxqty']),2)*/
+                e.record.data['FTaxAmount']=floatObj.multiply(floatObj.multiply(e.record.data['Fauxqty'],e.record.data['Fprice']),floatObj.divide(e.record.data['FTaxRate'],100))
+                e.record.data['Fauxprice']=floatObj.add(floatObj.multiply(floatObj.divide(e.record.data['FTaxRate'],100),e.record.data['Fprice']),e.record.data['Fprice'])
+                e.record.data['Famount']=floatObj.multiply(e.record.data['Fauxqty'],e.record.data['Fprice'])
+                e.record.data['Fallamount']=floatObj.multiply(e.record.data['Fauxqty'],e.record.data['Fauxprice'])
                 e.record.commit()
-               /* if(e.value!=e.originalValue){
 
-                }*/
             },
         }
     })],
@@ -159,7 +126,6 @@ Ext.define('JZYIndent.view.second.List', {
                 format: 'Y-m-d',
             },
         },
-
         {
             text: '申请数量',
             dataIndex: 'Fauxqty',
@@ -185,6 +151,12 @@ Ext.define('JZYIndent.view.second.List', {
             dataIndex: 'Fprice',
             align: 'center',
             filter: 'string',
+            editor: {
+                xtype: 'numberfield',
+                allowDecimals: true,
+                decimalPrecision: 0,
+                allowBlank: false,
+            },
         }, {
             text: '含税单价',
             dataIndex: 'Fauxprice',
@@ -196,7 +168,12 @@ Ext.define('JZYIndent.view.second.List', {
             dataIndex: 'FTaxRate',
             align: 'center',
             filter: 'string',
-
+            editor: {
+                xtype: 'numberfield',
+                allowDecimals: true,
+                decimalPrecision: 0,
+                allowBlank: false,
+            },
         },
         {
             text: '税额',
@@ -206,9 +183,9 @@ Ext.define('JZYIndent.view.second.List', {
             summaryType: function (records, value) {
                 var total = 0;
                 for (var i = 0; i < records.length; i++) {
-                    total += Number(records[i].get("FTaxAmount"));
+                    total += floatObj.add(total, records[i].get("FTaxAmount"));
                 }
-                return "<font style='color:red;';>" + Math.floor(total * 100) / 100 + "</font>"
+                return "<font style='color:red;';>" + total + "</font>"
             }
         },
         {
@@ -225,9 +202,9 @@ Ext.define('JZYIndent.view.second.List', {
             summaryType: function (records, value) {
                 var total = 0;
                 for (var i = 0; i < records.length; i++) {
-                    total += Number(records[i].get("Famount"));
+                    total += floatObj.add(total, records[i].get("Famount"));
                 }
-                return "<font style='color:red;';>" + Math.floor(total * 100) / 100 + "</font>"
+                return "<font style='color:red;';>" + total + "</font>"
             }
         },
         {
@@ -244,9 +221,9 @@ Ext.define('JZYIndent.view.second.List', {
             summaryType: function (records, value) {
                 var total = 0;
                 for (var i = 0; i < records.length; i++) {
-                    total += Number(records[i].get("Fallamount"));
+                    total += floatObj.add(total, records[i].get("Fallamount"));
                 }
-                return "<font style='color:red;';>" + Math.floor(total * 100) / 100 + "</font>"
+                return "<font style='color:red;';>" + total + "</font>"
             }
         },
        /* {

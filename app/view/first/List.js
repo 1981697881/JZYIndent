@@ -36,12 +36,12 @@ Ext.define('JZYIndent.view.first.List', {
                     for (var j = 0; j < nstore.getCount(); j++) {
                         console.log(parseInt(rstore.getAt(i).data['realQuantity']) + "," + parseInt(nstore.getAt(j).data["Fauxqty"]))
                         if (rstore.getAt(i).data.FNumber == nstore.getAt(j).data.FNumber) {
-                            nstore.getAt(j).set('Fauxqty', parseInt(rstore.getAt(i).data.realQuantity) + parseInt(nstore.getAt(j).data.Fauxqty));
+                            nstore.getAt(j).set('Fauxqty', floatObj.add(rstore.getAt(i).data.realQuantity,nstore.getAt(j).data.Fauxqty));
                             nstore.getAt(j).set('Fprice', rstore.getAt(i).data.FPlanPrice);
-                            nstore.getAt(j).set('Fauxprice', Math.floor(((parseFloat(Ext.util.Cookies.get("FEmpID"))/100) * parseFloat(nstore.getAt(j).data.Fprice) + parseFloat(nstore.getAt(j).data.Fprice)) * 10000) / 10000);
-                            nstore.getAt(j).set('FTaxAmount', Math.floor((parseFloat(Ext.util.Cookies.get("FEmpID"))/100) * (parseFloat(nstore.getAt(j).get('Fauxqty')) * parseFloat(nstore.getAt(j).get('Fprice'))) * 10000) / 10000);
-                            nstore.getAt(j).set('Famount', Math.floor((parseFloat(nstore.getAt(j).get('Fauxqty')) * parseFloat(nstore.getAt(j).get('Fprice'))) * 10000) / 10000);
-                            nstore.getAt(j).set('Fallamount', Math.floor((parseFloat(nstore.getAt(j).get('Fauxqty')) * parseFloat(nstore.getAt(j).get('Fprice'))+parseFloat(nstore.getAt(j).data.FTaxAmount)) * 10000) / 10000);
+                            nstore.getAt(j).set('Fauxprice', floatObj.add(floatObj.multiply((parseFloat(rstore.getAt(i).data.FTaxRate)/100),nstore.getAt(j).data.Fprice),nstore.getAt(j).data.Fprice));
+                            nstore.getAt(j).set('FTaxAmount', floatObj.multiply(floatObj.multiply(nstore.getAt(j).get('Fauxqty'),nstore.getAt(j).get('Fprice')),(parseFloat(nstore.getAt(j).get('FTaxRate'))/100)));
+                            nstore.getAt(j).set('Famount',  floatObj.multiply(nstore.getAt(j).get('Fauxqty'),nstore.getAt(j).get('Fprice')));
+                            nstore.getAt(j).set('Fallamount', floatObj.multiply(nstore.getAt(j).get('Fauxqty'),nstore.getAt(j).get('Fauxprice')));
                             number++;
                             break;
                         }
@@ -50,12 +50,12 @@ Ext.define('JZYIndent.view.first.List', {
                         //查询窗口插入数据
                         rstore.getAt(i).set('Fauxqty', rstore.getAt(i).data.realQuantity);
                         rstore.getAt(i).set('Fprice', rstore.getAt(i).data.FPlanPrice);
-                        rstore.getAt(i).set('Fauxprice', Math.floor(((parseFloat(Ext.util.Cookies.get("FEmpID"))/100) * parseFloat(rstore.getAt(i).data.FPlanPrice) + parseFloat(rstore.getAt(i).data.Fprice)) * 10000) / 10000);
                         rstore.getAt(i).set('FTaxRate', Ext.util.Cookies.get("FEmpID"));
-                        rstore.getAt(i).set('FTaxAmount', Math.floor((parseFloat(Ext.util.Cookies.get("FEmpID"))/100) * ((parseFloat(rstore.getAt(i).data.realQuantity) * parseFloat(rstore.getAt(i).data.Fprice))) * 10000) / 10000);
+                        rstore.getAt(i).set('Fauxprice', floatObj.add(floatObj.multiply((parseFloat(rstore.getAt(i).data.FTaxRate)/100),rstore.getAt(i).data.FPlanPrice),rstore.getAt(i).data.Fprice ));
+                        rstore.getAt(i).set('FTaxAmount', floatObj.multiply(floatObj.multiply(rstore.getAt(i).data.realQuantity,rstore.getAt(i).data.Fprice),(parseFloat(rstore.getAt(i).data.FTaxRate)/100)));
                         rstore.getAt(i).set('FEntryID', nstore.getCount() + 1);
-                        rstore.getAt(i).set('Famount', Math.floor((parseFloat(rstore.getAt(i).data.realQuantity) * parseFloat(rstore.getAt(i).data.Fprice)) * 10000) / 10000);
-                        rstore.getAt(i).set('Fallamount', Math.floor((parseFloat(rstore.getAt(i).data.realQuantity) * parseFloat(rstore.getAt(i).data.Fprice) +parseFloat(rstore.getAt(i).data.FTaxAmount)) * 10000) / 10000);
+                        rstore.getAt(i).set('Famount',floatObj.multiply(rstore.getAt(i).data.realQuantity,rstore.getAt(i).data.Fprice));
+                        rstore.getAt(i).set('Fallamount', floatObj.multiply(rstore.getAt(i).data.realQuantity,rstore.getAt(i).data.Fauxprice));
                         sgrid.getStore().insert(nstore.getCount() + 1, rstore.getAt(i).data);
                     }
                     rstore.getAt(i).set('realQuantity', '')
@@ -80,7 +80,7 @@ Ext.define('JZYIndent.view.first.List', {
                   /*  if(e.value <= e.record.data['FCanUseQty']){*/
                         var count = 0
                         for (var i = 0; i < e.grid.getStore().getCount(); i++) {
-                            if(e.grid.getStore().getAt(i).data['realQuantity']!=null && e.grid.getStore().getAt(i).data['realQuantity'] != undefined) {
+                            if((e.grid.getStore().getAt(i).data['realQuantity']!=null && e.grid.getStore().getAt(i).data['realQuantity'] != undefined)&&e.grid.getStore().getAt(i).data['FPlanPrice']!=null && e.grid.getStore().getAt(i).data['FPlanPrice'] != undefined) {
                                 count += parseInt(e.grid.getStore().getAt(i).data['realQuantity'])
                                 subtotal.setValue(count)
                                 e.record.commit()
@@ -203,14 +203,6 @@ Ext.define('JZYIndent.view.first.List', {
                 xtype: 'numberfield',
                 allowBlank: false,
             },
-        },
-        {
-            text: '销售单价',
-            dataIndex: 'FSalePrice',
-            align: 'center',
-            filter: 'string',
-            hideable: false,
-            hidden: true,
         },
     ],
     // onDestroy: function () {
